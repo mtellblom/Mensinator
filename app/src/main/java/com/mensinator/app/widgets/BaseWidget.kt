@@ -38,11 +38,9 @@ class BaseWidget(
         }
     }
 
-    val getData = combine(
-        calculationsHelper.nextPeriod(),
-        calculationsHelper.cycleDay(LocalDate.now()),
-        MidnightTrigger.midnightTrigger,
-    ) { nextPeriod, cycleDay, _ ->
+    val getData = calculationsHelper.nextPeriod().combine(
+        calculationsHelper.cycleDay(LocalDate.now())
+    ) { nextPeriod, cycleDay ->
         WidgetData(
             daysUntilPeriodWithoutText = formatDaysUntilPeriod(
                 nextPeriod,
@@ -57,7 +55,7 @@ class BaseWidget(
             cycleDay = cycleDay,
             nextPeriod = nextPeriod
         )
-    }
+    }.combine(MidnightTrigger.midnightTrigger) { data, _ -> data }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         super.providePreview(context, widgetCategory)
