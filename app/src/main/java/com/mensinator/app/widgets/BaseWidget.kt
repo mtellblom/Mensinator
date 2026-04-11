@@ -33,14 +33,14 @@ class BaseWidget(
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            val state = getData.collectAsState(WidgetData("", "", "", "", null, null))
+            val state = getData.collectAsState(WidgetData("", "", "", ""))
             WidgetContent(widgetType, showLabel, showBackground, state)
         }
     }
 
     val getData = calculationsHelper.nextPeriod().combine(
-        calculationsHelper.cycleDay(LocalDate.now())
-    ) { nextPeriod, cycleDay ->
+        MidnightTrigger.midnightTrigger
+    ) { nextPeriod, _ ->
         WidgetData(
             daysUntilPeriodWithoutText = formatDaysUntilPeriod(
                 nextPeriod,
@@ -51,11 +51,9 @@ class BaseWidget(
                 NextPeriodFormat.MediumLengthText
             ),
             daysUntilOvulationWithText = "",
-            daysUntilOvulationWithoutText = "",
-            cycleDay = cycleDay,
-            nextPeriod = nextPeriod
+            daysUntilOvulationWithoutText = ""
         )
-    }.combine(MidnightTrigger.midnightTrigger) { data, _ -> data }
+    }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         super.providePreview(context, widgetCategory)
@@ -67,8 +65,6 @@ class BaseWidget(
                         daysUntilPeriodWithText = "Period in 10 days",
                         daysUntilOvulationWithoutText = "",
                         daysUntilOvulationWithText = "",
-                        cycleDay = 5,
-                        nextPeriod = null
                     )
                 )
             }
