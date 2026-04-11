@@ -7,6 +7,7 @@ import java.time.Duration
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.delay
 
 class MidnightWorker(val context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
@@ -35,6 +36,8 @@ class MidnightWorker(val context: Context, params: WorkerParameters) : Coroutine
     }
 
     override suspend fun doWork(): Result {
+        // Wait for 1 second to ensure the worker has time to start
+        delay(1000)
         MidnightTrigger.midnightTrigger.emit(Unit)
         WidgetInstances.forEach { it.glanceAppWidget.updateAll(context) }
         // Schedule the next update for the following midnight
