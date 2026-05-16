@@ -3,6 +3,7 @@ package com.mensinator.app.widgets
 import android.content.Context
 import androidx.glance.appwidget.updateAll
 import androidx.work.*
+import com.mensinator.app.BuildConfig
 import java.time.Duration
 import java.time.LocalTime
 import java.time.ZonedDateTime
@@ -13,14 +14,12 @@ class MidnightWorker(val context: Context, params: WorkerParameters) : Coroutine
 
     companion object {
         fun scheduleNextMidnight(context: Context) {
-            val now = ZonedDateTime.now()
-            // Calculate the next midnight in the current time zone
-            val nextMidnight = now
-                .plusDays(1)
-                .with(LocalTime.MIDNIGHT)
-
-            // Calculate the duration between now and midnight
-            val delay = Duration.between(now, nextMidnight).toMillis()
+            val delay = if (BuildConfig.DEBUG) {
+                WidgetDebugPrefs.getIntervalMillis(context)
+            } else {
+                val now = ZonedDateTime.now()
+                Duration.between(now, now.plusDays(1).with(LocalTime.MIDNIGHT)).toMillis()
+            }
 
             val request = OneTimeWorkRequestBuilder<MidnightWorker>()
                 .setInitialDelay(delay, TimeUnit.MILLISECONDS)

@@ -184,4 +184,7 @@
     <string name="export_data">Export Data</string>
     <string name="about_app">About App</string>
     <string name="rename_symptom" >Rename symptom</string>
+    <string name="debug_section_header">Debug</string>
+    <string name="debug_widget_update_interval">Widget update interval</string>
+    <string name="debug_widget_update_interval_unit">min</string>
 </resources>

@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import com.mensinator.app.BuildConfig
 import org.koin.core.context.GlobalContext.get
 import org.koin.dsl.module
 
@@ -13,15 +14,21 @@ val WidgetModule = module {
     single { WidgetPeriodDaysWithoutLabelWithBackgroundReceiver() }
     single { WidgetPeriodDaysWithLabelWithoutBackgroundReceiver() }
     single { WidgetPeriodDaysWithoutLabelWithoutBackgroundReceiver() }
+    if (BuildConfig.DEBUG) {
+        single { DebugWidgetReceiver() }
+    }
 }
 
 val WidgetInstances
-    get() = listOf(
-        get().get<WidgetPeriodDaysWithLabelWithBackgroundReceiver>(),
-        get().get<WidgetPeriodDaysWithoutLabelWithBackgroundReceiver>(),
-        get().get<WidgetPeriodDaysWithLabelWithoutBackgroundReceiver>(),
-        get().get<WidgetPeriodDaysWithoutLabelWithoutBackgroundReceiver>(),
-    )
+    get() = buildList {
+        add(get().get<WidgetPeriodDaysWithLabelWithBackgroundReceiver>())
+        add(get().get<WidgetPeriodDaysWithoutLabelWithBackgroundReceiver>())
+        add(get().get<WidgetPeriodDaysWithLabelWithoutBackgroundReceiver>())
+        add(get().get<WidgetPeriodDaysWithoutLabelWithoutBackgroundReceiver>())
+        if (BuildConfig.DEBUG) {
+            add(get().get<DebugWidgetReceiver>())
+        }
+    }
 
 abstract class BaseWidgetReceiver : GlanceAppWidgetReceiver() {
     override fun onUpdate(
@@ -65,4 +72,8 @@ class WidgetPeriodDaysWithoutLabelWithoutBackgroundReceiver : BaseWidgetReceiver
         showLabel = false,
         showBackground = false
     )
+}
+
+class DebugWidgetReceiver : BaseWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = DebugWidget()
 }

@@ -16,7 +16,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,8 +36,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.mensinator.app.BuildConfig
 import com.mensinator.app.R
 import com.mensinator.app.data.ColorSource
+import com.mensinator.app.widgets.MidnightWorker
+import com.mensinator.app.widgets.WidgetDebugPrefs
 import com.mensinator.app.ui.ResourceMapper
 import com.mensinator.app.ui.navigation.displayCutoutExcludingStatusBarsPadding
 import com.mensinator.app.ui.theme.MensinatorTheme
@@ -166,6 +173,13 @@ fun SettingsScreen(
         ImportExportRow(viewModel)
         Spacer(Modifier.height(32.dp))
         AboutSection(viewModel, viewState)
+
+        if (BuildConfig.DEBUG) {
+            Spacer(Modifier.height(16.dp))
+            SettingSectionHeader(text = stringResource(R.string.debug_section_header))
+            DebugWidgetIntervalSetting(context)
+        }
+
         Spacer(Modifier.height(16.dp))
 
         if (viewState.showLutealWarningDialog) {
@@ -629,6 +643,55 @@ private fun openNotificationSettings(context: Context) {
         putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
     }
     context.startActivity(intent)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DebugWidgetIntervalSetting(context: Context) {
+    var selected by remember { mutableIntStateOf(WidgetDebugPrefs.getIntervalMinutes(context)) }
+    var expanded by remember { mutableStateOf(false) }
+    val unit = stringResource(R.string.debug_widget_update_interval_unit)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(R.string.debug_widget_update_interval),
+            modifier = Modifier.weight(1f)
+        )
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = it }
+        ) {
+            OutlinedTextField(
+                value = "$selected $unit",
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                modifier = Modifier
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                    .width(120.dp),
+                singleLine = true
+            )
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                WidgetDebugPrefs.intervalOptions.forEach { minutes ->
+                    DropdownMenuItem(
+                        text = { Text("$minutes $unit") },
+                        onClick = {
+                            selected = minutes
+                            WidgetDebugPrefs.setIntervalMinutes(context, minutes)
+                            MidnightWorker.scheduleNextMidnight(context)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)
