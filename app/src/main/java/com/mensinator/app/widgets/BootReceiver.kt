@@ -7,8 +7,6 @@ import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 class BootReceiver : BroadcastReceiver() {
@@ -25,9 +23,7 @@ class BootReceiver : BroadcastReceiver() {
             try {
                 MidnightWorker.scheduleNextMidnight(appContext)
                 MidnightTrigger.midnightTrigger.emit(Unit)
-                WidgetInstances.map { receiver ->
-                    async { receiver.glanceAppWidget.updateAll(appContext) }
-                }.awaitAll()
+                BaseWidget().updateAll(appContext)
             } catch (e: Exception) {
                 android.util.Log.e("BootReceiver", "Failed to refresh widgets on boot", e)
             } finally {

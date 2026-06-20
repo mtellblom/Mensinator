@@ -2,10 +2,13 @@ package com.mensinator.app.widgets
 
 import android.content.Context
 import androidx.compose.runtime.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.LocalContext
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
+import androidx.glance.currentState
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.mensinator.app.R
@@ -15,26 +18,24 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.time.LocalDate
 
-sealed class WidgetType {
-    data object Period : WidgetType()
-    data object Ovulation : WidgetType()
-}
+class BaseWidget : GlanceAppWidget(), KoinComponent {
 
-class BaseWidget(
-    val widgetType: WidgetType,
-    val showLabel: Boolean,
-    val showBackground: Boolean,
-) : GlanceAppWidget(), KoinComponent {
+    companion object {
+        val SHOW_LABEL = booleanPreferencesKey("show_label")
+        val SHOW_BACKGROUND = booleanPreferencesKey("show_background")
+    }
 
     private val calculationsHelper: CalculationsHelper by inject()
 
-    override val stateDefinition: GlanceStateDefinition<*> =
-        PreferencesGlanceStateDefinition
+    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
+            val prefs = currentState<Preferences>()
+            val showLabel = prefs[SHOW_LABEL] ?: true
+            val showBackground = prefs[SHOW_BACKGROUND] ?: true
             val state = getData.collectAsState(WidgetData("", "", "", ""))
-            WidgetContent(widgetType, showLabel, showBackground, state)
+            WidgetContent(showLabel, showBackground, state)
         }
     }
 
@@ -42,14 +43,8 @@ class BaseWidget(
         MidnightTrigger.midnightTrigger
     ) { nextPeriod, _ ->
         WidgetData(
-            daysUntilPeriodWithoutText = formatDaysUntilPeriod(
-                nextPeriod,
-                NextPeriodFormat.OnlyDays
-            ),
-            daysUntilPeriodWithText = formatDaysUntilPeriod(
-                nextPeriod,
-                NextPeriodFormat.MediumLengthText
-            ),
+            daysUntilPeriodWithoutText = formatDaysUntilPeriod(nextPeriod, NextPeriodFormat.OnlyDays),
+            daysUntilPeriodWithText = formatDaysUntilPeriod(nextPeriod, NextPeriodFormat.MediumLengthText),
             daysUntilOvulationWithText = "",
             daysUntilOvulationWithoutText = ""
         )
@@ -68,44 +63,21 @@ class BaseWidget(
                     )
                 )
             }
-            WidgetContent(widgetType, showLabel, showBackground, state)
+            WidgetContent(showLabel = true, showBackground = true, state)
         }
     }
 
     @Composable
-    private fun WidgetContent(
-        widgetType: WidgetType,
-        showLabel: Boolean,
-        showBackground: Boolean,
-        state: State<WidgetData>
-    ) {
+    private fun WidgetContent(showLabel: Boolean, showBackground: Boolean, state: State<WidgetData>) {
         val data = state.value
         val context = LocalContext.current
-        val textWithoutLabel = when (widgetType) {
-            WidgetType.Period -> data.daysUntilPeriodWithoutText
-            WidgetType.Ovulation -> data.daysUntilOvulationWithoutText
-        }
-        val textWithLabel = when (widgetType) {
-            WidgetType.Period -> data.daysUntilPeriodWithText
-            WidgetType.Ovulation -> data.daysUntilOvulationWithText
-        }
-        val label = when (widgetType) {
-            WidgetType.Period -> context.getString(R.string.widget_period_abbreviation)
-            WidgetType.Ovulation -> context.getString(R.string.widget_ovulation_abbreviation)
-        }
+        val label = context.getString(R.string.widget_period_abbreviation)
 
         MensinatorGlanceTheme {
             if (showLabel) {
-                WidgetContentWithLabel(
-                    text = textWithLabel,
-                    showBackground = showBackground
-                )
+                WidgetContentWithLabel(text = data.daysUntilPeriodWithText, showBackground = showBackground)
             } else {
-                WidgetContentWithoutLabel(
-                    text = textWithoutLabel,
-                    label = label,
-                    showBackground = showBackground
-                )
+                WidgetContentWithoutLabel(text = data.daysUntilPeriodWithoutText, label = label, showBackground = showBackground)
             }
         }
     }
@@ -115,26 +87,11 @@ class BaseWidget(
         data object MediumLengthText : NextPeriodFormat
     }
 
-    private fun formatDaysUntilPeriod(
-        date: LocalDate?,
-        format: NextPeriodFormat
-    ): String {
+    private fun formatDaysUntilPeriod(date: LocalDate?, format: NextPeriodFormat): String {
         val daysUntilNextPeriod = LocalDate.now().until(date).days
         return when (format) {
-            NextPeriodFormat.OnlyDays -> {
-                if (date == null) {
-                    "?"
-                } else {
-                    "$daysUntilNextPeriod"
-                }
-            }
-            NextPeriodFormat.MediumLengthText -> {
-                if (date == null) {
-                    "Unknown"
-                } else {
-                    "Period in $daysUntilNextPeriod days"
-                }
-            }
+            NextPeriodFormat.OnlyDays -> if (date == null) "?" else "$daysUntilNextPeriod"
+            NextPeriodFormat.MediumLengthText -> if (date == null) "Unknown" else "Period in $daysUntilNextPeriod days"
         }
     }
 }

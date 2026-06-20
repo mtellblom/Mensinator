@@ -36,10 +36,7 @@ object PeriodCalculationWidgetUpdater : KoinComponent {
             try {
                 // Emit to midnight trigger to force widget data refresh
                 MidnightTrigger.midnightTrigger.emit(Unit)
-                // Update all widgets concurrently for better performance
-                WidgetInstances.map { receiver ->
-                    launch { receiver.glanceAppWidget.updateAll(context) }
-                }
+                BaseWidget().updateAll(context)
             } catch (e: Exception) {
                 android.util.Log.e("PeriodCalculationWidgetUpdater", "Failed to update widgets", e)
             }
