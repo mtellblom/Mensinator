@@ -15,7 +15,14 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.time.LocalDate
 
-class BaseWidget(
+/**
+ * Shared rendering logic for the period widgets. Each on-screen design is a distinct
+ * subclass (see [WidgetInstances]) — this matters because Glance resolves which widget
+ * instances to refresh in [androidx.glance.appwidget.GlanceAppWidget.updateAll] by the
+ * concrete class. If several receivers shared one class, updateAll() would update the
+ * wrong instances and designs would stomp on each other.
+ */
+abstract class BaseWidget(
     val showLabel: Boolean,
     val showBackground: Boolean,
 ) : GlanceAppWidget(), KoinComponent {
@@ -81,10 +88,18 @@ class BaseWidget(
     }
 
     private fun formatDaysUntilPeriod(date: LocalDate?, format: NextPeriodFormat): String {
+        // date is null when no period has been tracked yet. Guard before calling
+        // until(), which throws NullPointerException on a null temporal.
+        if (date == null) {
+            return when (format) {
+                NextPeriodFormat.OnlyDays -> "?"
+                NextPeriodFormat.MediumLengthText -> "Unknown"
+            }
+        }
         val daysUntilNextPeriod = WidgetDebugDayShift.today(appContext).until(date).days
         return when (format) {
-            NextPeriodFormat.OnlyDays -> if (date == null) "?" else "$daysUntilNextPeriod"
-            NextPeriodFormat.MediumLengthText -> if (date == null) "Unknown" else "Period in $daysUntilNextPeriod days"
+            NextPeriodFormat.OnlyDays -> "$daysUntilNextPeriod"
+            NextPeriodFormat.MediumLengthText -> "Period in $daysUntilNextPeriod days"
         }
     }
 }

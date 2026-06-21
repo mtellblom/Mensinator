@@ -34,18 +34,27 @@ abstract class BaseWidgetReceiver : GlanceAppWidgetReceiver() {
     }
 }
 
+/**
+ * One concrete [BaseWidget] subclass per design. Distinct classes are required so Glance
+ * can map each placed widget to the right receiver when refreshing — see [BaseWidget].
+ */
+class PeriodWidgetWithLabelWithBackground : BaseWidget(showLabel = true, showBackground = true)
+class PeriodWidgetWithoutLabelWithBackground : BaseWidget(showLabel = false, showBackground = true)
+class PeriodWidgetWithLabelWithoutBackground : BaseWidget(showLabel = true, showBackground = false)
+class PeriodWidgetWithoutLabelWithoutBackground : BaseWidget(showLabel = false, showBackground = false)
+
 class WidgetPeriodDaysWithLabelWithBackgroundReceiver : BaseWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = BaseWidget(showLabel = true, showBackground = true)
+    override val glanceAppWidget: GlanceAppWidget = PeriodWidgetWithLabelWithBackground()
 }
 
 class WidgetPeriodDaysWithoutLabelWithBackgroundReceiver : BaseWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = BaseWidget(showLabel = false, showBackground = true)
+    override val glanceAppWidget: GlanceAppWidget = PeriodWidgetWithoutLabelWithBackground()
 }
 
 class WidgetPeriodDaysWithLabelWithoutBackgroundReceiver : BaseWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = BaseWidget(showLabel = true, showBackground = false)
+    override val glanceAppWidget: GlanceAppWidget = PeriodWidgetWithLabelWithoutBackground()
 }
 
 class WidgetPeriodDaysWithoutLabelWithoutBackgroundReceiver : BaseWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = BaseWidget(showLabel = false, showBackground = false)
+    override val glanceAppWidget: GlanceAppWidget = PeriodWidgetWithoutLabelWithoutBackground()
 }
