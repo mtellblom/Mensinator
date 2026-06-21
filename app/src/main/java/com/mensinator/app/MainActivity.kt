@@ -16,9 +16,11 @@ import com.mensinator.app.NotificationChannelConstants.channelId
 import com.mensinator.app.NotificationChannelConstants.channelName
 import com.mensinator.app.ui.navigation.MensinatorApp
 import com.mensinator.app.ui.theme.MensinatorTheme
-import com.mensinator.app.widgets.BaseWidget
 import com.mensinator.app.widgets.MidnightTrigger
+import com.mensinator.app.widgets.WidgetInstances
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.KoinAndroidContext
 
@@ -59,7 +61,9 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 MidnightTrigger.midnightTrigger.emit(Unit)
-                BaseWidget().updateAll(this@MainActivity)
+                WidgetInstances.map { receiver ->
+                    async { receiver.glanceAppWidget.updateAll(this@MainActivity) }
+                }.awaitAll()
             } catch (e: Exception) {
                 Log.e("MainActivity", "Failed to update widgets on app start", e)
             }

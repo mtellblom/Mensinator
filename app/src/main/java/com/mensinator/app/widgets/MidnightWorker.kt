@@ -40,7 +40,7 @@ class MidnightWorker(val context: Context, params: WorkerParameters) : Coroutine
             // Wait for 1 second to ensure the worker has time to start
             delay(1000)
             MidnightTrigger.midnightTrigger.emit(Unit)
-            BaseWidget().updateAll(context)
+            WidgetInstances.forEach { it.glanceAppWidget.updateAll(context) }
         } catch (e: Exception) {
             android.util.Log.e("MidnightWorker", "Failed to refresh widgets at midnight", e)
         } finally {

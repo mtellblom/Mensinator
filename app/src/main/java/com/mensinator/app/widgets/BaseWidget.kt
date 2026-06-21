@@ -2,13 +2,10 @@ package com.mensinator.app.widgets
 
 import android.content.Context
 import androidx.compose.runtime.*
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.LocalContext
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
-import androidx.glance.currentState
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.mensinator.app.R
@@ -18,12 +15,10 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.time.LocalDate
 
-class BaseWidget : GlanceAppWidget(), KoinComponent {
-
-    companion object {
-        val SHOW_LABEL = booleanPreferencesKey("show_label")
-        val SHOW_BACKGROUND = booleanPreferencesKey("show_background")
-    }
+class BaseWidget(
+    val showLabel: Boolean,
+    val showBackground: Boolean,
+) : GlanceAppWidget(), KoinComponent {
 
     private val calculationsHelper: CalculationsHelper by inject()
 
@@ -31,9 +26,6 @@ class BaseWidget : GlanceAppWidget(), KoinComponent {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            val prefs = currentState<Preferences>()
-            val showLabel = prefs[SHOW_LABEL] ?: true
-            val showBackground = prefs[SHOW_BACKGROUND] ?: true
             val state = getData.collectAsState(WidgetData("", "", "", ""))
             WidgetContent(showLabel, showBackground, state)
         }
@@ -63,7 +55,7 @@ class BaseWidget : GlanceAppWidget(), KoinComponent {
                     )
                 )
             }
-            WidgetContent(showLabel = true, showBackground = true, state)
+            WidgetContent(showLabel, showBackground, state)
         }
     }
 

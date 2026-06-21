@@ -4,5 +4,5 @@
     android:minHeight="40dp"
     android:targetCellWidth="2"
     android:targetCellHeight="1"
-    android:description="@string/widget_days_until_period_with_label_with_bg"
+    android:description="@string/widget_days_until_period_with_label_no_bg"
 />

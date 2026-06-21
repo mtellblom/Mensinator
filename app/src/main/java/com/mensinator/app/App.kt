@@ -59,7 +59,7 @@ class App : Application() {
         startKoin {
             androidLogger()
             androidContext(this@App)
-            modules(appModule)
+            modules(appModule, WidgetModule)
         }
 
         MidnightWorker.scheduleNextMidnight(this.applicationContext)
@@ -74,7 +74,10 @@ class App : Application() {
 
         @SuppressLint("CheckResult")
         applicationScope.launch {
-            glanceAppWidgetManager.setWidgetPreviews(MensinatorWidgetReceiver::class)
+            glanceAppWidgetManager.setWidgetPreviews(WidgetPeriodDaysWithLabelWithBackgroundReceiver::class)
+            glanceAppWidgetManager.setWidgetPreviews(WidgetPeriodDaysWithLabelWithoutBackgroundReceiver::class)
+            glanceAppWidgetManager.setWidgetPreviews(WidgetPeriodDaysWithoutLabelWithBackgroundReceiver::class)
+            glanceAppWidgetManager.setWidgetPreviews(WidgetPeriodDaysWithoutLabelWithoutBackgroundReceiver::class)
         }
     }
 }

@@ -25,14 +25,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".widgets.WidgetConfigActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
         <receiver
             android:name=".NotificationReceiver"
             android:exported="true"
@@ -43,7 +35,7 @@
         </receiver>
 
         <receiver
-            android:name=".widgets.MensinatorWidgetReceiver"
+            android:name=".widgets.WidgetPeriodDaysWithLabelWithBackgroundReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -51,6 +43,39 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/mensinator_widget_provider" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.WidgetPeriodDaysWithLabelWithoutBackgroundReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/mensinator_widget_provider2" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.WidgetPeriodDaysWithoutLabelWithBackgroundReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/mensinator_widget_provider3" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.WidgetPeriodDaysWithoutLabelWithoutBackgroundReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/mensinator_widget_provider4" />
         </receiver>
 
         <receiver
