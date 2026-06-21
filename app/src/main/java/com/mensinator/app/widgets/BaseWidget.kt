@@ -21,6 +21,7 @@ class BaseWidget(
 ) : GlanceAppWidget(), KoinComponent {
 
     private val calculationsHelper: CalculationsHelper by inject()
+    private val appContext: Context by inject()
 
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
 
@@ -80,7 +81,7 @@ class BaseWidget(
     }
 
     private fun formatDaysUntilPeriod(date: LocalDate?, format: NextPeriodFormat): String {
-        val daysUntilNextPeriod = LocalDate.now().until(date).days
+        val daysUntilNextPeriod = WidgetDebugDayShift.today(appContext).until(date).days
         return when (format) {
             NextPeriodFormat.OnlyDays -> if (date == null) "?" else "$daysUntilNextPeriod"
             NextPeriodFormat.MediumLengthText -> if (date == null) "Unknown" else "Period in $daysUntilNextPeriod days"
