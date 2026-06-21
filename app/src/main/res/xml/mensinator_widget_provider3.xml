@@ -4,5 +4,6 @@
     android:minHeight="73dp"
     android:targetCellWidth="1"
     android:targetCellHeight="1"
+    android:previewLayout="@layout/widget_preview_without_label_with_bg"
     android:description="@string/widget_days_until_period_no_label_with_bg"
 />
